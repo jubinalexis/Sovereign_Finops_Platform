@@ -1,77 +1,92 @@
 # Sovereign FinOps Platform (Édition Cloud Privé)
 
-## Résumé Exécutif
-Ce projet a pour but de déployer une **infrastructure Kubernetes de qualité production** en simulant un environnement "Air-Gapped" (déconnecté/souverain) typique des secteurs de la Défense ou Bancaire Suisse.
+![Build Status](https://img.shields.io/badge/build-passing-brightgreen)
+![License](https://img.shields.io/badge/license-MIT-blue)
+![Terraform](https://img.shields.io/badge/terraform-validated-purple)
+![Kubernetes](https://img.shields.io/badge/kubernetes-v1.29-blue)
 
-Il met l'accent sur deux piliers critiques :
-1.  **Souveraineté des Données** : Infrastructure autonome sans dépendance aux services managés cloud (EKS/GKE).
-2.  **FinOps** : Observabilité précise des coûts, même sur du matériel "on-premise".
+## 📌 Résumé Exécutif
+Ce projet déploie une **infrastructure Kubernetes de qualité production** en simulant un environnement "Air-Gapped" (souverain), typique des secteurs de la **Défense** ou **Bancaire**.
 
-## Architecture Technique
+Il répond à deux impératifs stratégiques :
+1.  **Souveraineté Numérique** : Autonomie totale sans dépendance aux Clouds publics (AWS/GKE).
+2.  **Excellence FinOps** : Observabilité granulaire des coûts pour chaque microservice.
 
-### 1. Infrastructure (Le Hardware Virtuel)
-*   **Hyperviseur** : Docker
-*   **Orchestration** : Kind (Kubernetes in Docker) en mode Cluster (1 Control Plane, 2 Workers)
-*   **Provisioning** : Terraform (Infrastructure as Code)
+---
 
-### 2. Réseau (La Plomberie)
-*   **Load Balancing (L2)** : MetalLB pour l'attribution d'IPs locales.
-*   **Ingress** : NGINX Ingress Controller.
+## 🏗️ Architecture Technique
 
-### 3. GitOps & Automatisation
-*   **CD (Continuous Delivery)** : ArgoCD gère le déploiement continu des applications via le pattern "App of Apps".
-*   **Source of Truth** : Le code (ce dépôt) est l'unique source de vérité. Aucune modification manuelle avec `kubectl`.
+Le flux complet, de l'utilisateur jusqu'à la base de données sécurisée :
 
-### 4. Observabilité & FinOps
-*   **Métriques** : Prometheus Node Exporter.
-*   **Coûts** : OpenCost avec un modèle de tarification personnalisé (simulation de coûts CPU/RAM fictifs).
+```mermaid
+graph LR
+    User[Utilisateur] -- HTTPS --> LB[MetalLB LoadBalancer]
+    LB -- Traffic --> Ingress[NGINX Ingress]
+    
+    subgraph "Cluster Kubernetes (Kind)"
+        Ingress -- Routing --> Argo[ArgoCD UI]
+        Ingress -- Routing --> OC[OpenCost Dashboard]
+        Ingress -- Routing --> Apps[Applications Métier]
+        
+        Apps -- Fetch Secrets --> ESO[External Secrets Operator]
+        ESO -- Sync --> Vault[HashiCorp Vault]
+        OC -- Metrics --> Prom[Prometheus]
+    end
+    
+    style Vault fill:#ff9900,stroke:#333,stroke-width:2px
+    style ESO fill:#ff9900,stroke:#333,stroke-width:2px
+    style OC fill:#46b898,stroke:#333,stroke-width:2px
+```
 
-### 5. Sécurité & Hardening (Secrets)
-*   **Vault** : Gestion centralisée des secrets (HashiCorp Vault).
-*   **External Secrets Operator (ESO)** : Synchronisation automatique des secrets Vault vers Kubernetes Secrets.
-*   **Zéro Secret Codé en Dur** : Les manifestes ne contiennent aucune donnée sensible.
+### Stack Technologique
+*   **Infrastructure** : Docker, Kind, Terraform.
+*   **Réseau** : MetalLB (Layer 2), NGINX Ingress.
+*   **GitOps** : ArgoCD (Pattern App-of-Apps).
+*   **FinOps** : OpenCost, Prometheus.
+*   **Sécurité** : HashiCorp Vault, External Secrets Operator.
 
-#### Le Dashboard FinOps en Action
-> Implémentation d'une stratégie FinOps : Monitoring des coûts en temps réel sur cluster Kubernetes local avec modélisation de prix personnalisée.
+---
+
+## 📸 La Preuve par l'Image
+
+### 1. FinOps : Monitoring des Coûts en Temps Réel
+> Visualisation précise du coût par namespace, permettant une refacturation interne (Chargeback).
 
 ![Tableau de bord OpenCost](docs/images/opencost-dashboard.png)
 
-#### La Synchro GitOps
-> ArgoCD pilotant le déploiement de l'infrastructure et des outils de monitoring.
+### 2. GitOps : Synchronisation Automatisée
+> ArgoCD assure que l'état du cluster correspond toujours au code Git (Single Source of Truth).
 
 ![ArgoCD Sync](docs/images/argocd-sync.png)
 
-## Structure du Projet
+---
 
-```bash
-/sovereign-finops-platform
-├── infra/
-│   └── terraform/       # Code Terraform pour le déploiement du cluster
-├── Makefile             # Commandes d'automatisation
-└── README.md            # Ce fichier
-```
-
-## Démarrage Rapide
+## 🚀 Démarrage Rapide
 
 ### Prérequis
 *   Docker Desktop
 *   Terraform
-*   Kind (Kubernetes in Docker)
+*   Git
 
-### Installation
-Pour lancer l'infrastructure complète :
+### Installation (Windows / PowerShell)
+Lancez simplement ces commandes pour ériger l'infrastructure complète :
 
-```bash
-make infra-up
+```powershell
+# 1. Cloner le projet
+git clone https://github.com/jubinalexis/Sovereign_Finops_Platform.git
+cd sovereign-finops-platform
+
+# 2. Lancer l'infrastructure (via Terraform)
+cd infra/terraform
+terraform init
+terraform apply -auto-approve
+
+# 3. Vérifier que tout est vert !
+cd ../..
+.\scripts\verify.ps1
 ```
 
-Cela va :
-1.  Initialiser Terraform.
-2.  Créer le cluster Kubernetes local avec 3 nœuds.
-3.  Vérifier que les nœuds sont prêts.
-
-Pour détruire l'environnement :
-
-```bash
-make infra-down
-```
+### Accès aux services
+*   **ArgoCD** : `https://localhost:8080` (admin / via script vérif)
+*   **OpenCost** : `http://localhost:9090`
+*   **Vault** : `http://localhost:8200`
