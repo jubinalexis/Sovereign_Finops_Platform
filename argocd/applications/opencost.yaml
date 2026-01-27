@@ -17,6 +17,12 @@ spec:
           value: "sovereign-local"
         - name: opencost.prometheus.internal.enabled
           value: "true"
+        - name: opencost.prometheus.internal.serviceName
+          value: "prometheus-server"
+        - name: opencost.prometheus.internal.namespaceName
+          value: "opencost"
+        - name: opencost.prometheus.internal.port
+          value: "80"
         - name: service.type
           value: LoadBalancer
   destination:
