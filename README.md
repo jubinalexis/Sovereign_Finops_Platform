@@ -26,6 +26,11 @@ Il met l'accent sur deux piliers critiques :
 *   **Métriques** : Prometheus Node Exporter.
 *   **Coûts** : OpenCost avec un modèle de tarification personnalisé (simulation de coûts CPU/RAM fictifs).
 
+### 5. Sécurité & Hardening (Secrets)
+*   **Vault** : Gestion centralisée des secrets (HashiCorp Vault).
+*   **External Secrets Operator (ESO)** : Synchronisation automatique des secrets Vault vers Kubernetes Secrets.
+*   **Zéro Secret Codé en Dur** : Les manifestes ne contiennent aucune donnée sensible.
+
 #### Le Dashboard FinOps en Action
 > Implémentation d'une stratégie FinOps : Monitoring des coûts en temps réel sur cluster Kubernetes local avec modélisation de prix personnalisée.
 
