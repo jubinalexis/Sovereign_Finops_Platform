@@ -18,9 +18,23 @@ Il met l'accent sur deux piliers critiques :
 *   **Load Balancing (L2)** : MetalLB pour l'attribution d'IPs locales.
 *   **Ingress** : NGINX Ingress Controller.
 
-### 3. Observabilité & FinOps
+### 3. GitOps & Automatisation
+*   **CD (Continuous Delivery)** : ArgoCD gère le déploiement continu des applications via le pattern "App of Apps".
+*   **Source of Truth** : Le code (ce dépôt) est l'unique source de vérité. Aucune modification manuelle avec `kubectl`.
+
+### 4. Observabilité & FinOps
 *   **Métriques** : Prometheus Node Exporter.
 *   **Coûts** : OpenCost avec un modèle de tarification personnalisé (simulation de coûts CPU/RAM fictifs).
+
+#### Le Dashboard FinOps en Action
+> Implémentation d'une stratégie FinOps : Monitoring des coûts en temps réel sur cluster Kubernetes local avec modélisation de prix personnalisée.
+
+![Tableau de bord OpenCost](docs/images/opencost-dashboard.png)
+
+#### La Synchro GitOps
+> ArgoCD pilotant le déploiement de l'infrastructure et des outils de monitoring.
+
+![ArgoCD Sync](docs/images/argocd-sync.png)
 
 ## Structure du Projet
 
