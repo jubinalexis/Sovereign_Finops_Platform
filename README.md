@@ -2,6 +2,7 @@
 
 ![Build Status](https://img.shields.io/badge/build-passing-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-blue)
+![Version](https://img.shields.io/badge/version-1.0.0-blue)
 ![Terraform](https://img.shields.io/badge/terraform-validated-purple)
 ![Kubernetes](https://img.shields.io/badge/kubernetes-v1.29-blue)
 
@@ -107,6 +108,8 @@ cd ../..
 
 ### Operational Guides
 
+- **[Troubleshooting Guide](docs/TROUBLESHOOTING.md)** - Common issues and solutions
+- **[Changelog](CHANGELOG.md)** - Version history and design decisions
 - **[Scripts Documentation](scripts/README.md)** - Guide for all automation scripts
 - **[Walkthrough](https://github.com/jubinalexis/Sovereign_Finops_Platform/wiki)** - Step-by-step deployment walkthrough
 
