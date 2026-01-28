@@ -86,6 +86,34 @@ cd ../..
 .\scripts\verify.ps1
 ```
 
+---
+
+## 📚 Documentation
+
+### Architecture & Design
+
+- **[Architecture Overview](docs/ARCHITECTURE.md)** - Comprehensive architecture diagrams including:
+  - High-level component architecture
+  - Data flow diagrams
+  - Vault → ESO → Kubernetes secret synchronization sequence
+  - Network architecture
+  - GitOps workflow
+  
+- **[Application Dependencies](docs/DEPENDENCIES.md)** - Detailed dependency matrix:
+  - Component dependency graph
+  - Deployment order and sync waves
+  - Failure scenarios and impact analysis
+  - Recovery procedures
+
+### Operational Guides
+
+- **[Scripts Documentation](scripts/README.md)** - Guide for all automation scripts
+- **[Walkthrough](https://github.com/jubinalexis/Sovereign_Finops_Platform/wiki)** - Step-by-step deployment walkthrough
+
+---
+
+## 🔑 Access Information
+
 ### Accès aux services
 *   **ArgoCD** : `https://localhost:8080` (admin / via script vérif)
 *   **OpenCost** : `http://localhost:9090`
