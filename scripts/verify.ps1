@@ -4,8 +4,17 @@ kubectl get nodes
 Write-Host "`n=== 2. Checking ArgoCD Applications ===" -ForegroundColor Cyan
 kubectl get applications -n argocd
 
+Write-Host "`n=== 3. Checking Governance (Kyverno) ===" -ForegroundColor Cyan
+$kyvernoPods = kubectl get pods -n kyverno --field-selector=status.phase=Running --no-headers
+if ($kyvernoPods) {
+    Write-Host "✅ Kyverno is running." -ForegroundColor Green
+}
+else {
+    Write-Host "❌ Kyverno is NOT running." -ForegroundColor Red
+}
+
 Write-Host "`n=== 3. Checking Critical Pods (Non-Running) ===" -ForegroundColor Cyan
-kubectl get pods -A --field-selector=status.phase!=Running,status.phase!=Succeeded
+kubectl get pods -A --field-selector=status.phase!=Running, status.phase!=Succeeded
 
 Write-Host "`n=== 4. Checking Secrets Integration ===" -ForegroundColor Cyan
 Write-Host "Fetching 'finops-db-creds-k8s' from 'external-secrets' namespace..."
@@ -21,7 +30,8 @@ if ($secret) {
     
     Write-Host "Username: $usernameDecoded"
     Write-Host "Password: $passwordDecoded"
-} else {
+}
+else {
     Write-Host "❌ Secret NOT found." -ForegroundColor Red
 }
 

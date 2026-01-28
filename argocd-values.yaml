@@ -1,0 +1,11 @@
+server:
+  extraArgs:
+    - --insecure
+
+configs:
+  cm:
+    # Active l'utilisateur "anonymous"
+    users.anonymous.enabled: "true"
+  rbac:
+    # Donne les droits "admin" par défaut à tout le monde (y compris anonyme)
+    policy.default: role:admin

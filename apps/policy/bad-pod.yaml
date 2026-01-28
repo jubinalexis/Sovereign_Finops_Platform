@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: root-pod
+  labels:
+    app: root-app
+spec:
+  containers:
+  - name: root-container
+    image: nginx:latest
+    securityContext:
+      runAsNonRoot: false
