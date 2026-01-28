@@ -7,6 +7,7 @@ on:
     branches: [ "main" ]
 
 jobs:
+  # Infrastructure as Code Quality
   iac-quality:
     name: "Infrastructure as Code Quality"
     runs-on: ubuntu-latest
@@ -36,6 +37,7 @@ jobs:
           tflint
         working-directory: infra/terraform
 
+  # Vulnerability Scanning
   security-scan:
     name: "Vulnerability Scanning (Trivy)"
     runs-on: ubuntu-latest
@@ -51,3 +53,40 @@ jobs:
           exit-code: '1'
           ignore-unfixed: true
           severity: 'CRITICAL,HIGH'
+  
+  # Secret scanning with Gitleaks
+ secret-scan:
+    name: "Secret Scanning (Gitleaks)"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full git history for better detection
+      
+      - name: Run Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Upload Gitleaks results (if secrets found)
+        if: failure()
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: results.sarif
+  
+  # Security validation
+  security-validation:
+    name: "Security Configuration Validation"
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        environment: [dev, prod]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Run security validation for ${{ matrix.environment }}
+        shell: pwsh
+        run: |
+          ./scripts/validate-security.ps1 -Environment ${{ matrix.environment }}

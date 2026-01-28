@@ -1,0 +1,57 @@
+# ArgoCD Configuration - Development Environment
+# ⚠️ WARNING: This configuration is INSECURE and only suitable for LOCAL DEVELOPMENT
+# DO NOT USE IN PRODUCTION - See argocd-values-prod.yaml for production config
+
+server:
+  # ❌ INSECURE: Disable TLS for local development
+  # Production MUST use TLS with valid certificates
+  insecure: true
+  
+  # ❌ HIGHLY INSECURE: Anonymous admin access enabled
+  # This allows ANYONE to access ArgoCD with full admin privileges
+  # No password required - purely for demo purposes
+  rbacConfig:
+    policy.default: role:admin
+  
+  # Additional UI configuration
+  config:
+    # Allow anonymous users to view applications
+    users.anonymous.enabled: "true"
+
+# Controller configuration
+controller:
+  # Metrics for Prometheus
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: false  # Enable if Prometheus Operator is installed
+
+# Development-friendly settings
+configs:
+  params:
+    # Faster sync for development
+    timeout.reconciliation: 60s  # Check for changes every 60s (default: 180s)
+    
+  repositories:
+    # If you need to add private repos in dev
+    # DO NOT commit actual credentials here - use external secret management
+
+# Resource limits for development (lower than production)
+# Adjust based on your local machine resources
+global:
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+# ⚠️ SECURITY SUMMARY FOR DEV ENVIRONMENT:
+# - No TLS encryption
+# - Anonymous admin access
+# - No RBAC enforcement
+# - No SSO integration
+# - Faster sync intervals (more resource usage)
+#
+# This configuration trades security for convenience in LOCAL DEVELOPMENT ONLY

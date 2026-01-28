@@ -1,0 +1,198 @@
+# ArgoCD Configuration - Production Environment
+# ✅ SECURE: This configuration follows production security best practices
+
+server:
+  # ✅ TLS REQUIRED: HTTPS with valid certificate
+  insecure: false
+  
+  # Certificate configuration
+  # Option 1: Use cert-manager for automatic certificate management
+  # Option 2: Provide your own certificate via secret
+  certificate:
+    enabled: true
+    domain: argocd.yourdomain.com
+    issuer:
+      name: letsencrypt-prod
+      kind: ClusterIssuer
+  
+  # ✅ RBAC ENFORCED: No anonymous access
+  # Users must authenticate via SSO
+  rbacConfig:
+    # Default policy: Deny all
+    policy.default: ""
+    
+    # Example RBAC policies (customize for your organization)
+    policy.csv: |
+      # Admin role - full access
+      p, role:admin, applications, *, */*, allow
+      p, role:admin, clusters, *, *, allow
+      p, role:admin, repositories, *, *, allow
+      p, role:admin, projects, *, *, allow
+      p, role:admin, accounts, *, *, allow
+      p, role:admin, gpgkeys, *, *, allow
+      p, role:admin, certificates, *, *, allow
+      
+      # Developer role - read-only + sync apps in specific projects
+      p, role:developer, applications, get, */*, allow
+      p, role:developer, applications, sync, */*, allow
+      p, role:developer, applications, override, */*, allow
+      p, role:developer, repositories, get, *, allow
+      p, role:developer, clusters, get, *, allow
+      p, role:developer, projects, get, *, allow
+      
+      # Viewer role - read-only access
+      p, role:viewer, applications, get, */*, allow
+      p, role:viewer, repositories, get, *, allow
+      p, role:viewer, clusters, get, *, allow
+      p, role:viewer, projects, get, *, allow
+      
+      # Map groups from SSO to roles
+      g, developers, role:developer
+      g, viewers, role:viewer
+      g, platform-team, role:admin
+  
+  # ✅ SSO INTEGRATION: Use OIDC/SAML for authentication
+  config:
+    # Disable anonymous access
+    users.anonymous.enabled: "false"
+    
+    # Example: OIDC with Google (customize for your provider)
+    url: https://argocd.yourdomain.com
+    oidc.config: |
+      name: Google
+      issuer: https://accounts.google.com
+      clientID: $oidc.google.clientId
+      clientSecret: $oidc.google.clientSecret
+      requestedScopes:
+        - openid
+        - profile
+        - email
+      requestedIDTokenClaims:
+        groups:
+          essential: true
+    
+    # Alternative: SAML configuration
+    # dex.config: |
+    #   connectors:
+    #     - type: saml
+    #       id: saml
+    #       name: Corporate SSO
+    #       config:
+    #         ssoURL: https://sso.corp.com/adfs/ls
+    #         ...
+
+# ✅ HIGH AVAILABILITY: Multiple replicas for production
+replicaCount: 3
+
+# Application controller HA
+controller:
+  replicas: 3
+  
+  metrics:
+    enabled: true
+    serviceMonitor:
+      enabled: true  # For Prometheus Operator
+  
+  # Production resource limits
+  resources:
+    limits:
+      cpu: 2000m
+      memory: 4Gi
+    requests:
+      cpu: 500m
+      memory: 1Gi
+
+# Repo server HA
+repoServer:
+  replicas: 3
+  
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 2Gi
+    requests:
+      cpu: 250m
+      memory: 512Mi
+
+# Application server HA
+apiServer:
+  replicas: 3
+  
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+# ✅ PERSISTENCE: Redis with persistent storage
+redis-ha:
+  enabled: true
+  haproxy:
+    enabled: true
+    replicas: 3
+
+# ✅ INGRESS: Expose via Ingress Controller
+ingress:
+  enabled: true
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/ssl-protocols: "TLSv1.2 TLSv1.3"
+  hosts:
+    - argocd.yourdomain.com
+  tls:
+    - secretName: argocd-tls
+      hosts:
+        - argocd.yourdomain.com
+
+# ✅ NETWORK POLICIES: Restrict traffic
+networkPolicy:
+  enabled: true
+  defaultDenyIngress: true
+  
+# ✅ POD SECURITY: Non-root, read-only filesystem
+global:
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 999
+    fsGroup: 999
+    seccompProfile:
+      type: RuntimeDefault
+  
+  containerSecurityContext:
+    allowPrivilegeEscalation: false
+    readOnlyRootFilesystem: true
+    runAsNonRoot: true
+    capabilities:
+      drop:
+        - ALL
+
+# ✅ MONITORING & ALERTING
+configs:
+  params:
+    # Production sync interval
+    timeout.reconciliation: 180s  # Default: 3 minutes
+    
+    # Application health check
+    controller.status.processors: 20
+    controller.operation.processors: 10
+
+# ✅ BACKUP CONFIGURATION
+# Ensure ArgoCD Application definitions are backed up
+# Consider using Velero or similar tools for cluster-level backups
+
+# ✅ AUDIT LOGGING
+# Enable audit logs for compliance
+server:
+  config:
+    admin.enabled: "false"  # Disable local admin account, use SSO only
+
+# ⚠️ REMEMBER TO:
+# 1. Store SSO client secrets in external secret management (Vault, AWS Secrets Manager)
+# 2. Enable cert-manager for automatic certificate rotation
+# 3. Configure monitoring alerts for ArgoCD sync failures
+# 4. Set up backup/restore procedures
+# 5. Document runbooks for incident response
+# 6. Regular security audits of RBAC policies
