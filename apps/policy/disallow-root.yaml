@@ -18,6 +18,12 @@ spec:
         - resources:
             kinds:
               - Pod
+      exclude:
+        any:
+        - resources:
+            namespaces:
+            - argocd
+            - kube-system
       validate:
         message: >-
           Running as root is not allowed. The fields spec.securityContext.runAsNonRoot,
